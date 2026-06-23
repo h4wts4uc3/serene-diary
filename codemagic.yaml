@@ -1,23 +1,38 @@
 workflows:
   flet-ios-build:
     name: Compilar Diario Serene iOS
-    max_build_duration: 15
+    max_build_duration: 60
     instance_type: mac_mini_m1
     triggering:
       events:
         - push
+    environment:
+      vars:
+        XCODE_WORKSPACE: "Runner.xcworkspace"
+      flutter: stable
     scripts:
       - name: Instalar Flet y Dependencias
         script: |
           pip3 install --break-system-packages flet
+
       - name: Compilar paquete iOS plano (Sin Firmar)
         script: |
-          flet build ipa --no-sign
+          flet build ipa --no-sign --verbose
+
+      - name: Localizar el .app generado
+        script: |
+          find build/ipa -name "*.app" -print
+
       - name: Crear Estructura Payload para Sideloadly
         script: |
           cd build/ipa
-          mkdir Payload
-          mv products/ios/build/Release-iphoneos/*.app Payload/
+          mkdir -p Payload
+          APP_PATH=$(find . -name "*.app" -maxdepth 6 | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "ERROR: No se encontró el archivo .app generado por flet build"
+            exit 1
+          fi
+          mv "$APP_PATH" Payload/
           zip -r SereneApp.ipa Payload
     artifacts:
       - build/ipa/SereneApp.ipa
