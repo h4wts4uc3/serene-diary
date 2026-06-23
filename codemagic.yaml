@@ -12,12 +12,12 @@ workflows:
           pip3 install --break-system-packages flet
       - name: Compilar paquete iOS plano (Sin Firmar)
         script: |
-          flet build ios --no-sign
+          flet build ipa --no-sign
       - name: Crear Estructura Payload para Sideloadly
         script: |
-          cd build/ios
+          cd build/ipa
           mkdir Payload
           mv products/ios/build/Release-iphoneos/*.app Payload/
           zip -r SereneApp.ipa Payload
     artifacts:
-      - build/ios/SereneApp.ipa
+      - build/ipa/SereneApp.ipa
