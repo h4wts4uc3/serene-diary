@@ -13,7 +13,7 @@ workflows:
 
       - name: Compilar paquete iOS (Sin Firmar)
         script: |
-          flet build ipa --no-sign -vv
+          flet build ipa -vv
 
       - name: Inspeccionar salida del build
         script: |
