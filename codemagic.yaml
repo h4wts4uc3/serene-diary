@@ -1,0 +1,25 @@
+workflows:
+  flet-ios-build:
+    name: Compilar Diario Serene iOS
+    max_build_duration: 15
+    instance_type: mac_mini_m1
+    environment:
+      python: 3.12
+    triggering:
+      events:
+        - push
+    scripts:
+      - name: Instalar Flet y Dependencias
+        script: |
+          pip install flet
+      - name: Compilar paquete iOS plano (Sin Firmar)
+        script: |
+          flet build ios --no-sign
+      - name: Crear Estructura Payload para Sideloadly
+        script: |
+          cd build/ios
+          mkdir Payload
+          mv products/ios/build/Release-iphoneos/*.app Payload/
+          zip -r SereneApp.ipa Payload
+    artifacts:
+      - build/ios/SereneApp.ipa
