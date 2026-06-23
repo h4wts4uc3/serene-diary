@@ -3,15 +3,13 @@ workflows:
     name: Compilar Diario Serene iOS
     max_build_duration: 15
     instance_type: mac_mini_m1
-    environment:
-      python: 3.12
     triggering:
       events:
         - push
     scripts:
       - name: Instalar Flet y Dependencias
         script: |
-          pip install flet
+          pip3 install --break-system-packages flet
       - name: Compilar paquete iOS plano (Sin Firmar)
         script: |
           flet build ios --no-sign
