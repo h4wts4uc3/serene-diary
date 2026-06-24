@@ -1,43 +1,30 @@
 workflows:
-  flet-ios-build:
-    name: Compilar Diario Serene iOS
-    max_build_duration: 60
-    instance_type: mac_mini_m1
+  flet-android-build:
+    name: Compilar Diario Serene Android
+    max_build_duration: 30
+    instance_type: linux_x2
     triggering:
       events:
         - push
     scripts:
       - name: Instalar Flet y Dependencias
         script: |
-          pip3 install --break-system-packages flet==0.85.3
+          pip3 install --break-system-packages -r requirements.txt
 
-      - name: Compilar paquete iOS (Sin Firmar)
+      - name: Inspeccionar estructura del proyecto
         script: |
-          flet build ipa -vv
+          echo "=== Directorio actual ==="
+          pwd
+          echo "=== Contenido de la raiz del repo ==="
+          ls -la
+
+      - name: Compilar APK Android
+        script: |
+          flet build apk -vv
 
       - name: Inspeccionar salida del build
         script: |
           echo "=== Contenido de build/ ==="
           find build -maxdepth 4 -print
-
-      - name: Crear Estructura Payload para Sideloadly
-        script: |
-          cd build/ipa
-          mkdir -p Payload
-
-          # Buscar el .app ya sea suelto o dentro de un .xcarchive
-          APP_PATH=$(find . -name "*.app" -path "*xcarchive*" | head -n 1)
-          if [ -z "$APP_PATH" ]; then
-            APP_PATH=$(find . -name "*.app" | head -n 1)
-          fi
-
-          if [ -z "$APP_PATH" ]; then
-            echo "ERROR: No se encontro ningun .app. Revisa el log del paso anterior."
-            exit 1
-          fi
-
-          echo "App encontrada en: $APP_PATH"
-          cp -R "$APP_PATH" Payload/
-          zip -r SereneApp.ipa Payload
     artifacts:
-      - build/ipa/SereneApp.ipa
+      - build/apk/*.apk
